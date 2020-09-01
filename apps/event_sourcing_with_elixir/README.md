@@ -1,3 +1,0 @@
-# EventSourcingWithElixir
-
-**TODO: Add description**

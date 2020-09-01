@@ -1,1 +1,4 @@
-# EventSourcingWithElixir.Umbrella
+# EventSourcingWithElixir
+
+**TODO: Add description**
+
