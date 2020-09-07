@@ -8,3 +8,19 @@
 # configurations or dependencies per app, it is best to
 # move said applications out of the umbrella.
 import Config
+
+config :logger, :console, level: :warn
+
+config :shared, EventStore.Repo,
+  database: "eventstore_#{Mix.env()}",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
+
+config :order_service, OrderService.Repo,
+  database: "order_service_#{Mix.env()}",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox

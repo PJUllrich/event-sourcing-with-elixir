@@ -16,9 +16,6 @@ defmodule Shared.EventConsumer do
         opts[:event_store] ||
           raise "EventConsumer: (event_store: MyApp.EventStore) configuration is missing"
 
-        opts[:for_event] ||
-          raise "EventConsumer: (for_event: MyApp.ExampleEvent) configuration is missing"
-
         opts = Keyword.merge(opts, handler_module: handler_module)
 
         GenServer.start_link(__MODULE__, opts, name: handler_module)
@@ -44,28 +41,38 @@ defmodule Shared.EventConsumer do
 
       # Event notification
       def handle_info({:events, events}, %{events: existing_events} = state) do
-        for event <- events, do: handle_event(event, state)
+        state =
+          for event <- events, reduce: state do
+            state -> handle_event(event, state)
+          end
 
-        {:noreply, %{state | events: existing_events ++ events}}
+        {:noreply, state}
       end
 
       def handle_call(:received_events, _from, %{events: events} = state) do
         {:reply, events, state}
       end
 
-      def handle_event(event, %{handler_module: handler_module} = state) do
-        case handler_module.handle(event) do
+      defp handle_event(
+             %{data: data} = event,
+             %{handler_module: handler_module, events: events} = state
+           ) do
+        ack_event(event, state)
+
+        case handler_module.handle(data) do
           :ok ->
-            ack_event(event, state)
+            %{state | events: [event | events]}
+
+          :not_handled ->
+            state
 
           error ->
             Logger.error(inspect(error))
-
-            ack_event(event, state)
+            state
         end
       end
 
-      def ack_event(event, %{event_store: event_store, subscription: subscription}) do
+      defp ack_event(event, %{event_store: event_store, subscription: subscription}) do
         :ok = event_store.ack(subscription, event)
       end
     end
@@ -73,7 +80,8 @@ defmodule Shared.EventConsumer do
 
   defmacro __before_compile__(_env) do
     quote generated: true do
-      def handle(_event), do: :ok
+      def handle(_event), do: :not_handled
+
       defoverridable handle: 1
     end
   end
