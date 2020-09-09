@@ -9,6 +9,9 @@ defmodule Shared.EventConsumer do
 
       @opts unquote(opts) || []
 
+      ###############################################################################################
+      # Client API
+
       def start_link(opts \\ []) do
         opts = Keyword.merge(@opts, opts)
         handler_module = @opts[:handler_module] || __MODULE__
@@ -22,12 +25,15 @@ defmodule Shared.EventConsumer do
           |> Keyword.merge(handler_module: handler_module, state: initial_state)
           |> Map.new()
 
-        GenServer.start_link(__MODULE__, opts, name: handler_module)
+        GenServer.start_link(handler_module, opts, name: handler_module)
       end
 
       def get_state(subscriber) do
         GenServer.call(subscriber, :get_state)
       end
+
+      ###############################################################################################
+      # GenServer Callbacks
 
       def init(opts), do: {:ok, subscribe(opts)}
 
@@ -47,31 +53,37 @@ defmodule Shared.EventConsumer do
         {:reply, state, opts}
       end
 
-      defp handle_event(
-             %{data: data} = event,
-             %{handler_module: handler_module, state: old_state} = opts
-           ) do
-        data
-        |> handler_module.handle(old_state, event)
-        |> case do
-          {:ok, new_state} ->
-            %{opts | state: new_state}
-
-          error ->
-            Logger.error(inspect(error))
-            opts
-        end
-        |> ack_event(event)
-      end
-
-      defp ack_event(%{event_store: event_store, subscription: subscription} = opts, event) do
-        :ok = event_store.ack(subscription, event)
-        opts
-      end
+      ###############################################################################################
+      # Private functions
 
       defp subscribe(%{event_store: event_store, handler_module: handler_module} = opts) do
         {:ok, subscription} = event_store.subscribe_to_all_streams("#{handler_module}", self())
         Map.merge(opts, %{subscription: subscription})
+      end
+
+      defp handle_event(
+             %{data: event_data} = event,
+             %{handler_module: handler_module, state: old_state} = opts
+           ) do
+        new_state =
+          event_data
+          |> handler_module.handle(old_state, event)
+          |> case do
+            {:ok, new_state} ->
+              # Only acknowledge the event
+              ack_event(opts, event)
+              new_state
+
+            error ->
+              Logger.error(inspect(error))
+              old_state
+          end
+
+        %{opts | state: new_state}
+      end
+
+      defp ack_event(%{event_store: event_store, subscription: subscription} = opts, event) do
+        :ok = event_store.ack(subscription, event)
       end
     end
   end

@@ -42,8 +42,8 @@ defmodule EventConsumerTest do
         event_store: Shared.EventStore,
         initial_state: %{events: []}
 
-      def handle(%ExampleEvent{} = event, state) do
-        {:ok, %{state | events: [event]}}
+      def handle(%ExampleEvent{} = event_data, state) do
+        {:ok, %{state | events: [event_data]}}
       end
     end
 
