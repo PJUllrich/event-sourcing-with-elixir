@@ -12,77 +12,79 @@ defmodule Shared.EventConsumer do
       def start_link(opts \\ []) do
         opts = Keyword.merge(@opts, opts)
         handler_module = @opts[:handler_module] || __MODULE__
+        initial_state = @opts[:initial_state] || %{}
 
         opts[:event_store] ||
           raise "EventConsumer: (event_store: MyApp.EventStore) configuration is missing"
 
         opts =
           opts
-          |> Keyword.merge(handler_module: handler_module, events: [])
+          |> Keyword.merge(handler_module: handler_module, state: initial_state)
           |> Map.new()
 
         GenServer.start_link(__MODULE__, opts, name: handler_module)
       end
 
-      def received_events(subscriber) do
-        GenServer.call(subscriber, :received_events)
+      def get_state(subscriber) do
+        GenServer.call(subscriber, :get_state)
       end
 
       def init(opts), do: {:ok, subscribe(opts)}
 
       # Successfully subscribed to all streams
-      def handle_info({:subscribed, subscription}, state) do
-        {:noreply, state}
+      def handle_info({:subscribed, subscription}, opts) do
+        {:noreply, opts}
       end
 
       # Event notification
-      def handle_info({:events, events}, state) do
-        state = Enum.reduce(events, state, &handle_event/2)
+      def handle_info({:events, events}, opts) do
+        opts = Enum.reduce(events, opts, &handle_event/2)
 
-        {:noreply, state}
+        {:noreply, opts}
       end
 
-      def handle_call(:received_events, _from, %{events: events} = state) do
-        {:reply, events, state}
+      def handle_call(:get_state, _from, %{state: state} = opts) do
+        {:reply, state, opts}
       end
 
       defp handle_event(
              %{data: data} = event,
-             %{handler_module: handler_module, events: events} = state
+             %{handler_module: handler_module, state: old_state} = opts
            ) do
         data
-        |> handler_module.handle()
+        |> handler_module.handle(old_state, event)
         |> case do
-          :ok ->
-            %{state | events: [event | events]}
-
-          :not_handled ->
-            state
+          {:ok, new_state} ->
+            %{opts | state: new_state}
 
           error ->
             Logger.error(inspect(error))
-            state
+            opts
         end
         |> ack_event(event)
       end
 
-      defp ack_event(%{event_store: event_store, subscription: subscription} = state, event) do
+      defp ack_event(%{event_store: event_store, subscription: subscription} = opts, event) do
         :ok = event_store.ack(subscription, event)
-        state
+        opts
       end
 
-      defp subscribe(%{event_store: event_store, handler_module: handler_module} = state) do
+      defp subscribe(%{event_store: event_store, handler_module: handler_module} = opts) do
         {:ok, subscription} = event_store.subscribe_to_all_streams("#{handler_module}", self())
-        Map.merge(state, %{subscription: subscription})
+        Map.merge(opts, %{subscription: subscription})
       end
     end
   end
 
   defmacro __before_compile__(_env) do
     quote generated: true do
-      def handle(_event), do: :not_handled
+      def handle(_event_data, state), do: {:ok, state}
 
-      defoverridable handle: 1
+      defoverridable handle: 2
+
+      def handle(event_data, state, _event), do: handle(event_data, state)
+
+      defoverridable handle: 3
     end
   end
 end

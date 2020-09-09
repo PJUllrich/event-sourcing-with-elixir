@@ -12,10 +12,11 @@ defmodule EventConsumerTest do
   test "subscribes to an event stream" do
     defmodule TestEventConsumer do
       use Shared.EventConsumer,
-        event_store: Shared.EventStore
+        event_store: Shared.EventStore,
+        initial_state: %{events: []}
 
-      def handle(%ExampleEvent{} = _event) do
-        :ok
+      def handle(%ExampleEvent{} = _event_data, state, event) do
+        {:ok, %{state | events: [event]}}
       end
     end
 
@@ -26,7 +27,7 @@ defmodule EventConsumerTest do
     :ok = Shared.EventStore.append("foo", event, %{user: "someuser@example.com"})
 
     wait_until(fn ->
-      assert [event] = TestEventConsumer.received_events(subscriber)
+      assert %{events: [event]} = TestEventConsumer.get_state(subscriber)
       assert event.event_type == ExampleEvent |> to_string()
       assert event.data == %ExampleEvent{key: "test"}
       assert event.event_id
@@ -35,13 +36,14 @@ defmodule EventConsumerTest do
     end)
   end
 
-  test "ignores events for which no handle/1 function was defined" do
+  test "ignores events for which no handle/3 function was defined" do
     defmodule TestEventConsumer2 do
       use Shared.EventConsumer,
-        event_store: Shared.EventStore
+        event_store: Shared.EventStore,
+        initial_state: %{events: []}
 
-      def handle(%ExampleEvent{} = _event) do
-        :ok
+      def handle(%ExampleEvent{} = event, state) do
+        {:ok, %{state | events: [event]}}
       end
     end
 
@@ -54,7 +56,7 @@ defmodule EventConsumerTest do
     :ok = Shared.EventStore.append("foo", not_handled_event, %{user: "someuser@example.com"})
 
     wait_until(fn ->
-      assert [event] = TestEventConsumer2.received_events(subscriber)
+      assert %{events: [event]} = TestEventConsumer2.get_state(subscriber)
     end)
   end
 end
