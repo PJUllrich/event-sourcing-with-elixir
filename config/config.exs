@@ -1,43 +1,33 @@
-# This file is responsible for configuring your umbrella
-# and **all applications** and their dependencies with the
-# help of the Config module.
+# This file is responsible for configuring your application
+# and its dependencies with the aid of the Mix.Config module.
 #
-# Note that all applications in your umbrella share the
-# same configuration and dependencies, which is why they
-# all use the same configuration file. If you want different
-# configurations or dependencies per app, it is best to
-# move said applications out of the umbrella.
-import Config
+# This configuration file is loaded before any dependency and
+# is restricted to this project.
 
-config :shared,
+# General application configuration
+use Mix.Config
+
+config :demo,
   ecto_repos: [EventStore.Repo],
   event_stores: [Shared.EventStore]
 
-config :order_service, ecto_repos: [OrderService.Repo]
+# Configures the endpoint
+config :demo, Web.Endpoint,
+  url: [host: "localhost"],
+  secret_key_base: "N4HX2rebF2fWFq0BcjMQKxAFMrDhTcW4evDHp1oTsW6Cz42O0iuVq0l6c52r8q+l",
+  render_errors: [view: Web.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_server: Demo.PubSub,
+  live_view: [signing_salt: "Ew3EZ6mO"]
 
-config :shared, EventStore.Repo,
-  database: "eventstore_#{Mix.env()}",
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost"
-
-config :order_service, OrderService.Repo,
-  database: "order_service_#{Mix.env()}",
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost"
-
-config :shared, Shared.EventStore,
-  column_data_type: "jsonb",
-  serializer: EventStore.JsonbSerializer,
-  types: EventStore.PostgresTypes,
-  database: "eventstore_#{Mix.env()}",
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost"
-
+# Configures Elixir's Logger
 config :logger, :console,
-  level: :info,
-  format: "$date $time [$level] $metadata$message\n"
+  format: "$time $metadata[$level] $message\n",
+  metadata: [:request_id]
 
+# Use Jason for JSON parsing in Phoenix
+config :phoenix, :json_library, Jason
+
+
+# Import environment specific config. This must remain at the bottom
+# of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"
