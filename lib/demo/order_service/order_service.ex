@@ -1,7 +1,7 @@
 defmodule Demo.OrderService do
   use GenServer
 
-  alias Demo.Events.ShipmentRegistered
+  alias ShipmentRegistered
 
   ###############################################################################################
   # Client API
@@ -28,8 +28,20 @@ defmodule Demo.OrderService do
 
   def handle_info(:create_shipment, opts) do
     random_uuid = Faker.UUID.v4()
-    event = %ShipmentRegistered{id: random_uuid, destination: Faker.Address.En.street_address()}
+
+    event = %ShipmentRegistered{
+      shipment_id: random_uuid,
+      destination: Faker.Address.En.street_address()
+    }
+
     :ok = Shared.EventPublisher.publish(random_uuid, event, %{enacted_by: __MODULE__})
+
+    Phoenix.PubSub.broadcast_from!(
+      Demo.PubSub,
+      self(),
+      "OrderService.ShipmentRegistered",
+      event
+    )
 
     schedule_shipment_creation(opts)
     {:noreply, opts}

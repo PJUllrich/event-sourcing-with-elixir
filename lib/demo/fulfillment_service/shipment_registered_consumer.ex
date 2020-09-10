@@ -1,12 +1,8 @@
-defmodule State do
-  defstruct [:shipments]
-end
-
 defmodule FulfillmentService.ShipmentRegisteredConsumer do
-  use Shared.EventConsumer,
-    initial_state: %State{shipments: []}
+  use Shared.EventConsumer
 
-  def handle(%Demo.Events.ShipmentRegistered{} = shipment, %{shipments: shipments} = state) do
-    {:ok, %{state | shipments: [shipment | shipments]}}
+  def handle(%ShipmentRegistered{} = %{shipment_id: shipment_id}, state) do
+    FulfillmentService.schedule_shipment(shipment_id)
+    {:ok, state}
   end
 end

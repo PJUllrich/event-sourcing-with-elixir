@@ -1,3 +1,3 @@
-defmodule Demo.Events.ShipmentRegistered do
-  defstruct [:id, :destination]
+defmodule ShipmentRegistered do
+  defstruct [:shipment_id, :destination]
 end
