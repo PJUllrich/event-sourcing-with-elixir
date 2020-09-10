@@ -51,7 +51,8 @@ defmodule Demo.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:eventstore, "~> 1.1"}
+      {:eventstore, "~> 1.1"},
+      {:faker, "~> 0.15"}
     ]
   end
 

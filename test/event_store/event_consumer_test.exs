@@ -11,7 +11,6 @@ defmodule EventStore.EventConsumerTest do
 
   defmodule TestEventConsumer do
     use Shared.EventConsumer,
-      event_store: Shared.EventStore,
       initial_state: %{events: []}
 
     def handle(%ExampleEvent{} = _event_data, %{events: events} = state, event) do

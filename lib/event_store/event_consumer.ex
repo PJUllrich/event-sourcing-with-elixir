@@ -17,15 +17,14 @@ defmodule Shared.EventConsumer do
         handler_module = @opts[:handler_module] || __MODULE__
         initial_state = @opts[:initial_state] || %{}
         start_from = @opts[:start_from] || :origin
-
-        opts[:event_store] ||
-          raise "EventConsumer: (event_store: MyApp.EventStore) configuration is missing"
+        event_store = @opts[:event_store] || Shared.EventStore
 
         opts =
           opts
           |> Keyword.merge(
             handler_module: handler_module,
             start_from: start_from,
+            event_store: event_store,
             state: initial_state
           )
           |> Map.new()

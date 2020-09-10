@@ -7,15 +7,20 @@ defmodule Demo.Application do
 
   def start(_type, _args) do
     children =
-      [
-        EventStore.Repo,
-        # Start the Telemetry supervisor
-        Web.Telemetry,
-        # Start the PubSub system
-        {Phoenix.PubSub, name: Demo.PubSub},
-        # Start the Endpoint (http/https)
-        Web.Endpoint
-      ] ++ environment_specific_children(Mix.env())
+      environment_specific_children(Mix.env()) ++
+        [
+          EventStore.Repo,
+          # Start the Telemetry supervisor
+          Web.Telemetry,
+          # Start the PubSub system
+          {Phoenix.PubSub, name: Demo.PubSub},
+          # Start the Endpoint (http/https)
+          Web.Endpoint,
+          {Demo.OrderService, []},
+          {FulfillmentService.Supervisor, []}
+        ]
+
+    Faker.start()
 
     opts = [strategy: :one_for_one, name: Demo.Supervisor]
     Supervisor.start_link(children, opts)
