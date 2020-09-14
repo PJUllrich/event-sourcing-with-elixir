@@ -19,6 +19,11 @@ config :demo, Web.Endpoint,
   pubsub_server: Demo.PubSub,
   live_view: [signing_salt: "Ew3EZ6mO"]
 
+config :phoenix, :template_engines,
+  slim: PhoenixSlime.Engine,
+  slime: PhoenixSlime.Engine,
+  slimleex: PhoenixSlime.LiveViewEngine
+
 # Configures Elixir's Logger
 config :logger, :console,
   level: :info,

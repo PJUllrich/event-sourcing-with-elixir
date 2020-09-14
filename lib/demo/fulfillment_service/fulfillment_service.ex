@@ -31,7 +31,6 @@ defmodule FulfillmentService do
     }
 
     :ok = Shared.EventPublisher.publish(shipment_id, event, %{enacted_by: __MODULE__})
-    broadcast("ShipmentScheduled", event)
 
     Process.send_after(self(), {:out_for_delivery, shipment_id}, opts[:fulfillment_delay])
     {:reply, :ok, opts}

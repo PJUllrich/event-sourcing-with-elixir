@@ -1,0 +1,9 @@
+main.pt-4.h-full.bg-gray-200 role="main"
+  p.alert.alert-info role="alert" phx-click="lv:clear-flash" phx-value-key="info"
+    = live_flash(@flash, :info)
+
+  p.alert.alert-danger role="alert" phx-click="lv:clear-flash" phx-value-key="error"
+    = live_flash(@flash, :error)
+  
+  .container.mx-auto.h-full
+    = @inner_content

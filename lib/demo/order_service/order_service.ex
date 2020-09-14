@@ -9,7 +9,10 @@ defmodule Demo.OrderService do
   def start_link(opts \\ []) do
     shipment_creation_interval = opts[:shipment_creation_interval] || 3_000
 
-    opts = Keyword.merge(opts, shipment_creation_interval: shipment_creation_interval)
+    opts =
+      opts
+      |> Keyword.merge(shipment_creation_interval: shipment_creation_interval, running_id: 0)
+      |> Map.new()
 
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
@@ -26,15 +29,15 @@ defmodule Demo.OrderService do
     {:ok, opts}
   end
 
-  def handle_info(:create_shipment, opts) do
-    random_uuid = Faker.UUID.v4()
+  def handle_info(:create_shipment, %{running_id: running_id} = opts) do
+    next_id = running_id + 1
 
     event = %ShipmentRegistered{
-      shipment_id: random_uuid,
+      shipment_id: Integer.to_string(next_id),
       destination: Faker.Address.En.street_address()
     }
 
-    :ok = Shared.EventPublisher.publish(random_uuid, event, %{enacted_by: __MODULE__})
+    :ok = Shared.EventPublisher.publish("shipment-#{next_id}", event, %{enacted_by: __MODULE__})
 
     Phoenix.PubSub.broadcast_from!(
       Demo.PubSub,
@@ -44,7 +47,7 @@ defmodule Demo.OrderService do
     )
 
     schedule_shipment_creation(opts)
-    {:noreply, opts}
+    {:noreply, %{opts | running_id: next_id}}
   end
 
   def handle_call({:set_interval, interval}, _from, opts) do

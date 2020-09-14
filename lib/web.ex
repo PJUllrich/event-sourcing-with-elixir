@@ -22,7 +22,6 @@ defmodule Web do
       use Phoenix.Controller, namespace: Web
 
       import Plug.Conn
-      import Web.Gettext
       alias Web.Router.Helpers, as: Routes
     end
   end
@@ -45,7 +44,8 @@ defmodule Web do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {Web.LayoutView, "live.html"}
+        layout: {Web.LayoutView, "live.html"},
+        container: {:div, class: "h-full"}
 
       unquote(view_helpers())
     end
@@ -72,7 +72,6 @@ defmodule Web do
   def channel do
     quote do
       use Phoenix.Channel
-      import Web.Gettext
     end
   end
 
@@ -88,7 +87,6 @@ defmodule Web do
       import Phoenix.View
 
       import Web.ErrorHelpers
-      import Web.Gettext
       alias Web.Router.Helpers, as: Routes
     end
   end

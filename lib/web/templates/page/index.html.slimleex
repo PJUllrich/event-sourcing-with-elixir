@@ -1,0 +1,16 @@
+.flex.flex-wrap.h-full[class="-mx-5"]
+  .card
+    .card-table-wrapper
+      = live_component @socket, Web.PageLive.OrderComponent, shipments: @shipments
+
+  .card
+    .card-table-wrapper
+      = live_component @socket, Web.PageLive.OrderComponent, shipments: @shipments
+
+  .card
+    .card-table-wrapper
+      = live_component @socket, Web.PageLive.OrderComponent, shipments: @shipments
+
+  .card
+    .card-table-wrapper
+      = live_component @socket, Web.PageLive.OrderComponent, shipments: @shipments

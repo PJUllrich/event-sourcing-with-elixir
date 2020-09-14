@@ -17,7 +17,8 @@ defmodule Demo.Application do
           # Start the Endpoint (http/https)
           Web.Endpoint,
           {Demo.OrderService, []},
-          {FulfillmentService.Supervisor, []}
+          {FulfillmentService.Supervisor, []},
+          {TrackAndTraceService.Supervisor, []}
         ]
 
     Faker.start()

@@ -11,7 +11,7 @@ defmodule Demo.MixProject do
       lockfile: "mix.lock",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: [:phoenix] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -48,10 +48,10 @@ defmodule Demo.MixProject do
       {:phoenix_live_dashboard, "~> 0.2"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
-      {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:eventstore, "~> 1.1"},
+      {:phoenix_slime, "~> 0.13.1"},
       {:faker, "~> 0.15"}
     ]
   end
