@@ -33,6 +33,14 @@
   @apply rounded shadow-lg bg-white flex-1 relative overflow-auto;
 }
 
+.table-header {
+  @apply py-2 px-3 sticky top-0 border-b border-gray-200 bg-gray-100 text-gray-600 uppercase;
+}
+
+.cell {
+  @apply border-dashed border-t border-gray-200 px-5;
+}
+
 .icon {
   width: 1em;
   height: 1em;

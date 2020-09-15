@@ -13,7 +13,7 @@ defmodule Web.OrdersLive do
       |> assign(:shipments, socket.assigns[:shipments] || [])
       |> fetch_all_events()
 
-    {:ok, socket}
+    {:ok, socket, temporary_assigns: [shipments: []]}
   end
 
   @impl true

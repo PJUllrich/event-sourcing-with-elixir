@@ -18,7 +18,8 @@ defmodule Demo.Application do
           Web.Endpoint,
           {Demo.OrderService, []},
           {FulfillmentService.Supervisor, []},
-          {TrackAndTraceService.Supervisor, []}
+          {TrackAndTraceService.Supervisor, []},
+          {AnalyticsService.Supervisor, []}
         ]
 
     Faker.start()

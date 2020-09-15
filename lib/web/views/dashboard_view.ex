@@ -23,7 +23,7 @@ defmodule Web.DashboardView do
 
   def status(%{scheduled_for: scheduled_for}) when not is_nil(scheduled_for) do
     render(Web.IconView, "badge.html",
-      color: "gray",
+      color: "teal",
       label: "Scheduled",
       icon: "fa-clock"
     )

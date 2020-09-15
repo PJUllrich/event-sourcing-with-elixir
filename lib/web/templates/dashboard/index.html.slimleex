@@ -17,3 +17,7 @@
     .text-3xl Track and Trace Service
     .card-table-wrapper
       = live_render @conn, Web.TrackAndTraceLive
+
+    .text-3xl.pt-3 Analytics Service
+    .card-table-wrapper
+      = live_render @conn, Web.AnalyticsLive

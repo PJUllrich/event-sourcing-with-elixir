@@ -1,4 +1,4 @@
 tr[id="tracked-shipment-#{@shipment.shipment_id}"]
-  td.border-dashed.border-t.border-gray-200.px-5 = @shipment.shipment_id
-  td.border-dashed.border-t.border-gray-200.px-5 = status(@shipment)
-  td.border-dashed.border-t.border-gray-200.px-5 = @shipment.destination
+  td.cell = @shipment.shipment_id
+  td.cell = status(@shipment)
+  td.cell = @shipment.destination
