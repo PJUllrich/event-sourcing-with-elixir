@@ -25,22 +25,29 @@ defmodule FulfillmentService do
   def init(opts), do: {:ok, opts}
 
   def handle_call({:schedule_shipment, shipment_id}, _from, opts) do
+    Process.send_after(self(), {:schedule_shipment, shipment_id}, 3_000)
+    {:reply, :ok, opts}
+  end
+
+  def handle_info({:schedule_shipment, shipment_id}, opts) do
     event = %ShipmentScheduled{
       shipment_id: shipment_id,
-      scheduled_for: Time.utc_now() |> Time.add(opts[:fulfillment_delay])
+      scheduled_for:
+        NaiveDateTime.local_now() |> NaiveDateTime.to_time() |> Time.add(opts[:fulfillment_delay])
     }
 
     :ok = Shared.EventPublisher.publish(shipment_id, event, %{enacted_by: __MODULE__})
+    Broadcaster.broadcast("FulfillmentService", event)
 
     Process.send_after(self(), {:out_for_delivery, shipment_id}, opts[:fulfillment_delay])
-    {:reply, :ok, opts}
+    {:noreply, opts}
   end
 
   def handle_info({:out_for_delivery, shipment_id}, opts) do
     event = %ShipmentOutForDelivery{shipment_id: shipment_id}
 
     :ok = Shared.EventPublisher.publish(shipment_id, event, %{enacted_by: __MODULE__})
-    broadcast("ShipmentOutForDelivery", event)
+    Broadcaster.broadcast("FulfillmentService", event)
 
     Process.send_after(
       self(),
@@ -58,17 +65,8 @@ defmodule FulfillmentService do
     }
 
     :ok = Shared.EventPublisher.publish(shipment_id, event, %{enacted_by: __MODULE__})
-    broadcast("ShipmentDelivered", event)
+    Broadcaster.broadcast("FulfillmentService", event)
 
     {:noreply, opts}
-  end
-
-  defp broadcast(topic, event) do
-    Phoenix.PubSub.broadcast_from!(
-      Demo.PubSub,
-      self(),
-      "FulfillmentService." <> topic,
-      event
-    )
   end
 end

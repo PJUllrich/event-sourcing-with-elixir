@@ -9,6 +9,7 @@ html.h-full lang="en"
     link phx-track-static="" rel="stylesheet" href=Routes.static_path(@conn, "/css/app.css")
     script defer="" phx-track-static="" type="text/javascript" src=Routes.static_path(@conn, "/js/app.js")
   body.h-full
+    = render Web.IconView, "sprite.html"
     .wrapper.flex.flex-col.h-full
       header.border-b-2.bg-gray-100
         section.container.mx-auto.py-3

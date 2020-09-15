@@ -1,0 +1,17 @@
+
+.flex.flex-wrap.h-full[class="-mx-5"]
+  .card
+    .text-3xl Order Service
+    .card-table-wrapper
+      = live_render @conn, Web.OrdersLive
+
+  .card
+    .card-table-wrapper
+
+  .card
+    .text-3xl Fulfillment Service
+    .card-table-wrapper
+      = live_render @conn, Web.FulfillmentLive
+
+  .card
+    .card-table-wrapper

@@ -1,4 +1,4 @@
-table.border-collapse.table-auto.w-full.max-h-full.whitespace-no-wrap.table-striped.absolute
+table.border-collapse.table-auto.w-full.max-h-full.whitespace-no-wrap.table-striped.absolute.bg-white
   thead
     tr.text-left
       th.py-2.px-3.sticky.top-0.border-b.border-gray-200.bg-gray-100.text-gray-600.uppercase Shipment ID

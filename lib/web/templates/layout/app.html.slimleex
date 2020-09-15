@@ -1,8 +1,10 @@
-main.container role="main"
+main.pt-4.h-full.bg-gray-200 role="main"
   p.alert.alert-info role="alert" 
     = get_flash(@conn, :info)
 
   p.alert.alert-danger role="alert"
     = get_flash(@conn, :error)
-    
-  = @inner_content
+  
+  .container.mx-auto.h-full
+    = @inner_content
+

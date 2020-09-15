@@ -26,11 +26,18 @@
 }
 
 .card {
-  @apply p-5 items-stretch h-auto overflow-auto w-1/2;
+  @apply p-5 h-auto flex flex-col items-stretch w-1/2;
 }
 
 .card-table-wrapper {
-  @apply rounded shadow-lg bg-white h-full relative overflow-auto;
+  @apply rounded shadow-lg bg-white flex-1 relative overflow-auto;
+}
+
+.st-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  fill: currentColor;
 }
 
 /* Alerts and form errors */

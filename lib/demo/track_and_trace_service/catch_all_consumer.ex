@@ -2,7 +2,7 @@ defmodule TrackAndTraceService.CatchAllConsumer do
   use Shared.EventConsumer
 
   def handle(event, state) do
-    TrackAndTraceService.Broadcaster.broadcast(event)
+    Broadcaster.broadcast("TrackAndTraceService", event)
     {:ok, state}
   end
 end

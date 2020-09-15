@@ -30,6 +30,7 @@ defmodule Web do
     quote do
       use Phoenix.View,
         root: "lib/web/templates",
+        pattern: "**/*",
         namespace: Web
 
       # Import convenience functions from controllers
@@ -85,6 +86,7 @@ defmodule Web do
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
+      import Web.ViewHelpers
 
       import Web.ErrorHelpers
       alias Web.Router.Helpers, as: Routes

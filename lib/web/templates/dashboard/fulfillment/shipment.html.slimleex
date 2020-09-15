@@ -1,0 +1,5 @@
+tr[id="fulfillment-#{@shipment.shipment_id}"]
+  td.border-dashed.border-t.border-gray-200.px-5 = @shipment.shipment_id
+  td.border-dashed.border-t.border-gray-200.px-5 = time(@shipment.scheduled_for)
+  td.border-dashed.border-t.border-gray-200.px-5 = pill(@shipment.out_for_delivery)
+  td.border-dashed.border-t.border-gray-200.px-5 = pill(@shipment.delivered_successfully)

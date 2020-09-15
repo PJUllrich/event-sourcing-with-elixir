@@ -7,7 +7,7 @@ defmodule Demo.OrderService do
   # Client API
 
   def start_link(opts \\ []) do
-    shipment_creation_interval = opts[:shipment_creation_interval] || 3_000
+    shipment_creation_interval = opts[:shipment_creation_interval] || 10_000
 
     opts =
       opts
@@ -38,13 +38,7 @@ defmodule Demo.OrderService do
     }
 
     :ok = Shared.EventPublisher.publish("shipment-#{next_id}", event, %{enacted_by: __MODULE__})
-
-    Phoenix.PubSub.broadcast_from!(
-      Demo.PubSub,
-      self(),
-      "OrderService.ShipmentRegistered",
-      event
-    )
+    Broadcaster.broadcast("OrderService", event)
 
     schedule_shipment_creation(opts)
     {:noreply, %{opts | running_id: next_id}}
