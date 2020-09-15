@@ -33,11 +33,35 @@
   @apply rounded shadow-lg bg-white flex-1 relative overflow-auto;
 }
 
-.st-icon {
+.icon {
   width: 1em;
   height: 1em;
   vertical-align: -0.125em;
+  display: inline-block;
   fill: currentColor;
+}
+
+.badge {
+  @apply rounded px-3;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+
+  // Empty badges collapse automatically
+  &:empty {
+    display: none;
+  }
+}
+
+.badge-filled {
+  color: color("white");
+  background-color: color("gray");
+  border-color: color("gray");
+
+  .badge-icon {
+    color: color("white");
+  }
 }
 
 /* Alerts and form errors */

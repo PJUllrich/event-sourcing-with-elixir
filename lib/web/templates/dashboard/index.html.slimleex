@@ -14,4 +14,6 @@
       = live_render @conn, Web.FulfillmentLive
 
   .card
+    .text-3xl Track and Trace Service
     .card-table-wrapper
+      = live_render @conn, Web.TrackAndTraceLive
