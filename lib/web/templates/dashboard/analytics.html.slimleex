@@ -17,3 +17,5 @@
       .text-xl Failed Deliveries
       .text-3xl = @failed_deliveries
     .flex-1
+      .text-xl Failed Deliveries Ratio
+      .text-3xl #{(@failed_deliveries / (@successfull_deliveries + @failed_deliveries)) * 100 |> :erlang.float_to_binary([decimals: 2])} %
