@@ -1,0 +1,4 @@
+tr[id="vehicle-#{@vehicle.vehicle_id}"]
+  td.cell = @vehicle.vehicle_id
+  td.cell = status(@vehicle)
+  td.cell = @vehicle.planned_shipment_count

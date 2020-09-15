@@ -6,7 +6,9 @@
       = live_render @conn, Web.OrdersLive
 
   .card
+    .text-3xl Fleet Service
     .card-table-wrapper
+      = live_render @conn, Web.FleetLive
 
   .card
     .text-3xl Fulfillment Service

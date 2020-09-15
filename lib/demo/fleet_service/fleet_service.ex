@@ -29,10 +29,15 @@ defmodule FleetService do
   def delegate_shipment_to_vehicle(shipment_id),
     do: GenServer.call(__MODULE__, {:delegate_shipment, shipment_id})
 
+  def list_vehicles(), do: GenServer.call(__MODULE__, :list_vehicles)
+
   ###############################################################################################
   # GenServer Callbacks
 
   def init(opts), do: {:ok, opts}
+
+  def handle_call(:list_vehicles, _from, %{vehicles: vehicles} = opts),
+    do: {:reply, vehicles, opts}
 
   def handle_call(
         {:delegate_shipment, shipment_id},
@@ -51,16 +56,12 @@ defmodule FleetService do
       |> Map.update!(:planned_shipment_count, &(&1 + 1))
       |> update_vehicle(vehicles)
 
-    if vehicle.capacity == vehicle.planned_shipment_count do
-      Process.send_after(
-        self(),
-        {:vehicle_out_for_delivery, vehicle.vehicle_id},
-        opts[:out_for_deliver_delay]
-      )
-    end
-
     :ok = Shared.EventPublisher.publish(shipment_id, event, %{enacted_by: "FleetService"})
     Broadcaster.broadcast("FleetService", event)
+
+    if vehicle.capacity == vehicle.planned_shipment_count do
+      send(self(), {:vehicle_out_for_delivery, vehicle.vehicle_id})
+    end
 
     {:reply, :ok, %{opts | vehicles: vehicles}}
   end
@@ -68,7 +69,7 @@ defmodule FleetService do
   def handle_info({:vehicle_out_for_delivery, vehicle_id}, opts) do
     event = %VehicleOutForDelivery{vehicle_id: vehicle_id}
 
-    opts = update_vehicle(vehicle_id, opts, :out_for_delivery, true)
+    opts = update_vehicle(vehicle_id, opts, %{out_for_delivery: true})
     :ok = Shared.EventPublisher.publish(vehicle_id, event, %{enacted_by: "FleetService"})
     Broadcaster.broadcast("FleetService", event)
 
@@ -79,7 +80,7 @@ defmodule FleetService do
   def handle_info({:vehicle_returned, vehicle_id}, opts) do
     event = %VehicleReturned{vehicle_id: vehicle_id}
 
-    opts = update_vehicle(vehicle_id, opts, :out_for_delivery, false)
+    opts = update_vehicle(vehicle_id, opts, %{out_for_delivery: false, planned_shipment_count: 0})
     :ok = Shared.EventPublisher.publish(vehicle_id, event, %{enacted_by: "FleetService"})
     Broadcaster.broadcast("FleetService", event)
 
@@ -101,11 +102,11 @@ defmodule FleetService do
     end)
   end
 
-  defp update_vehicle(vehicle_id, %{vehicles: vehicles} = opts, key, new_value) do
+  defp update_vehicle(vehicle_id, %{vehicles: vehicles} = opts, attrs) do
     vehicles =
       vehicles
       |> Enum.find(&(&1.vehicle_id == vehicle_id))
-      |> Map.put(key, new_value)
+      |> Map.merge(attrs)
       |> update_vehicle(vehicles)
 
     %{opts | vehicles: vehicles}

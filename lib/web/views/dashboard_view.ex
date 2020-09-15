@@ -1,6 +1,18 @@
 defmodule Web.DashboardView do
   use Web, :view
 
+  def status(%Vehicle{out_for_delivery: true}) do
+    render(Web.IconView, "badge.html",
+      color: "yellow",
+      label: "Out for Delivery",
+      icon: "fa-truck"
+    )
+  end
+
+  def status(%Vehicle{out_for_delivery: false}) do
+    render(Web.IconView, "badge.html", color: "teal", label: "Packing", icon: "fa-box-open")
+  end
+
   def status(%{delivered_successfully: true}) do
     render(Web.IconView, "badge.html", color: "green", label: "Delivered", icon: "fa-check")
   end

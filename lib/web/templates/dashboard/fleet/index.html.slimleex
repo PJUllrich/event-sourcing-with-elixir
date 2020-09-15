@@ -1,0 +1,10 @@
+table.border-collapse.table-fixed.w-full.max-h-full.whitespace-no-wrap.table-striped.absolute.bg-white
+  thead
+    tr.text-left
+      th.table-header[class="w-1/5"] Vehicle ID
+      th.table-header[class="w-1/4"] Status
+      th.table-header[class="w-1/4"] Shipments Planned
+  tbody#fleet-vehicles phx-update="replace"
+      = for vehicle <- @vehicles do
+        = live_component @socket, Web.FleetLive.VehicleComponent, id: vehicle.vehicle_id, vehicle: vehicle
+      
