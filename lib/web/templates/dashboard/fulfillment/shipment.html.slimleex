@@ -1,5 +1,5 @@
 tr[id="fulfillment-#{@shipment.shipment_id}"]
   td.cell = @shipment.shipment_id
   td.cell = time(@shipment.scheduled_for)
-  td.cell = pill(@shipment.out_for_delivery)
-  td.cell = pill(@shipment.delivered_successfully)
+  td.cell = out_for_delivery_badge(@shipment)
+  td.cell = delivered_badge(@shipment)

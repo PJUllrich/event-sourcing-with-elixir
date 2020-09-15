@@ -5,20 +5,18 @@ defmodule FleetService do
   # Client API
 
   def start_link(opts \\ []) do
-    out_for_deliver_delay = opts[:out_for_delivery_delay] || 2_000
-    delivery_time = opts[:delivery_time] || 7_000
+    delivery_time = opts[:delivery_time] || 10_000
 
     vehicles = [
-      %Vehicle{vehicle_id: "0", capacity: 1, planned_shipment_count: 0, out_for_delivery: false},
       %Vehicle{vehicle_id: "1", capacity: 2, planned_shipment_count: 0, out_for_delivery: false},
-      %Vehicle{vehicle_id: "2", capacity: 3, planned_shipment_count: 0, out_for_delivery: false}
+      %Vehicle{vehicle_id: "2", capacity: 2, planned_shipment_count: 0, out_for_delivery: false},
+      %Vehicle{vehicle_id: "3", capacity: 2, planned_shipment_count: 0, out_for_delivery: false}
     ]
 
     opts =
       opts
       |> Keyword.merge(
         vehicles: vehicles,
-        out_for_deliver_delay: out_for_deliver_delay,
         delivery_time: delivery_time
       )
       |> Map.new()
@@ -51,16 +49,15 @@ defmodule FleetService do
       vehicle_id: vehicle_id
     }
 
-    vehicles =
-      vehicle
-      |> Map.update!(:planned_shipment_count, &(&1 + 1))
-      |> update_vehicle(vehicles)
+    updated_vehicle = Map.update!(vehicle, :planned_shipment_count, &(&1 + 1))
+
+    vehicles = update_vehicle(updated_vehicle, vehicles)
 
     :ok = Shared.EventPublisher.publish(shipment_id, event, %{enacted_by: "FleetService"})
     Broadcaster.broadcast("FleetService", event)
 
-    if vehicle.capacity == vehicle.planned_shipment_count do
-      send(self(), {:vehicle_out_for_delivery, vehicle.vehicle_id})
+    if updated_vehicle.capacity <= updated_vehicle.planned_shipment_count do
+      send(self(), {:vehicle_out_for_delivery, updated_vehicle.vehicle_id})
     end
 
     {:reply, :ok, %{opts | vehicles: vehicles}}

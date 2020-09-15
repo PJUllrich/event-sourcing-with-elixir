@@ -7,8 +7,10 @@ defmodule FulfillmentService.Supervisor do
 
   def init(_args) do
     children = [
+      FulfillmentService,
       FulfillmentService.ShipmentRegisteredConsumer,
-      FulfillmentService
+      FulfillmentService.ShipmentDelegatedToVehicleConsumer,
+      FulfillmentService.VehicleOutForDeliveryConsumer
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

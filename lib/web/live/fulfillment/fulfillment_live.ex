@@ -29,8 +29,41 @@ defmodule Web.FulfillmentLive do
     update(socket, :shipments, fn shipments -> [shipment | shipments] end)
   end
 
-  defp handle(%ShipmentOutForDelivery{} = event_data, socket) do
-    update_shipment(Map.merge(event_data, %{out_for_delivery: true}), socket)
+  defp handle(
+         %ShipmentOutForDelivery{} = %{shipment_id: shipment_id, vehicle_id: vehicle_id},
+         socket
+       ) do
+    update_shipment(
+      %{shipment_id: shipment_id, delivering_vehicle: vehicle_id, out_for_delivery: true},
+      socket
+    )
+  end
+
+  defp handle(
+         %ShipmentDelegatedToVehicle{} = %{shipment_id: shipment_id, vehicle_id: vehicle_id},
+         socket
+       ) do
+    update_shipment(
+      %{shipment_id: shipment_id, scheduled_for_vehicle: vehicle_id},
+      socket
+    )
+  end
+
+  defp handle(
+         %ShipmentDelivered{} = %{
+           shipment_id: shipment_id,
+           delivered_successfully: delivered_successfully
+         },
+         socket
+       ) do
+    update_shipment(
+      %{
+        shipment_id: shipment_id,
+        delivered_successfully: delivered_successfully,
+        out_for_delivery: false
+      },
+      socket
+    )
   end
 
   defp handle(event_data, socket), do: update_shipment(event_data, socket)
@@ -38,6 +71,7 @@ defmodule Web.FulfillmentLive do
   defp fetch_all_events(socket) do
     Shared.EventStore.stream_all_forward()
     |> Stream.filter(&(&1.event_type != "#{ShipmentRegistered}"))
+    |> Enum.sort_by(& &1.created_at)
     |> Enum.map(& &1.data)
     |> Enum.reduce(socket, &handle/2)
   end
@@ -46,6 +80,7 @@ defmodule Web.FulfillmentLive do
     shipments =
       Shared.EventStore.stream_all_forward()
       |> Stream.filter(&(&1.event_type == "#{ShipmentRegistered}"))
+      |> Enum.sort_by(& &1.created_at)
       |> Stream.map(& &1.data)
       |> Stream.map(&create_shipment/1)
       |> Enum.sort_by(&String.to_integer(&1.shipment_id), :desc)

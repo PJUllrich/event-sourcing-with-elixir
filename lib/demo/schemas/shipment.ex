@@ -4,6 +4,8 @@ defmodule Shipment do
     :destination,
     :delivered_successfully,
     :out_for_delivery,
+    :delivering_vehicle,
+    :scheduled_for_vehicle,
     :scheduled_for
   ]
 end

@@ -19,7 +19,7 @@ defmodule Web.ViewHelpers do
   end
 
   def pill(nil) do
-    icon("hero-clock", class: "text-gray-400")
+    icon("fa-clock", class: "text-gray-400")
   end
 
   def pill(true) do

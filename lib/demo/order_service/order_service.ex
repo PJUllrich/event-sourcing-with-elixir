@@ -7,7 +7,7 @@ defmodule Demo.OrderService do
   # Client API
 
   def start_link(opts \\ []) do
-    shipment_creation_interval = opts[:shipment_creation_interval] || 10_000
+    shipment_creation_interval = opts[:shipment_creation_interval] || 7_000
 
     last_shipment_id =
       Shared.EventStore.stream_all_forward()

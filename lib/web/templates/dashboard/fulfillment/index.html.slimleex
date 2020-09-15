@@ -1,9 +1,9 @@
 table.border-collapse.table-fixed.w-full.max-h-full.whitespace-no-wrap.table-striped.absolute.bg-white
   thead
     tr.text-left
-      th.table-header[class="w-1/4"] Shipment ID
-      th.table-header[class="w-1/4"] Scheduled For
-      th.table-header[class="w-1/4"] Out for delivery
+      th.table-header[class="w-1/5"] Shipment ID
+      th.table-header[class="w-1/5"] Scheduled For
+      th.table-header[class="w-1/4"] Delivery Info
       th.table-header[class="w-1/4"] Delivered
   tbody#fulfillment-shipments phx-update="prepend"
       = for shipment <- @shipments do
