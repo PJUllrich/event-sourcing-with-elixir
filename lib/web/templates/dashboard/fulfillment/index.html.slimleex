@@ -5,7 +5,7 @@ table.border-collapse.table-auto.w-full.max-h-full.whitespace-no-wrap.table-stri
       th.py-2.px-3.sticky.top-0.border-b.border-gray-200.bg-gray-100.text-gray-600.uppercase Scheduled For
       th.py-2.px-3.sticky.top-0.border-b.border-gray-200.bg-gray-100.text-gray-600.uppercase Out for delivery
       th.py-2.px-3.sticky.top-0.border-b.border-gray-200.bg-gray-100.text-gray-600.uppercase Delivered
-  tbody#table-shipments phx-update="prepend"
+  tbody#fulfillment-shipments phx-update="prepend"
       = for shipment <- @shipments do
         = live_component @socket, Web.FulfillmentLive.ShipmentComponent, id: shipment.shipment_id, shipment: shipment
       
