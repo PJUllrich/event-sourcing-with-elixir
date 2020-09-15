@@ -6,7 +6,7 @@ defmodule FulfillmentService do
 
   def start_link(opts \\ []) do
     fulfillment_delay = opts[:fulfillment_delay] || 5_000
-    delivery_delay = opts[:delivery_delay] || 3_000
+    delivery_delay = opts[:delivery_delay] || 4_000
 
     opts =
       opts

@@ -1,4 +1,4 @@
-main.pt-4.h-full.bg-gray-200 role="main"
+main.h-full.bg-gray-200 role="main"
   p.alert.alert-info role="alert" phx-click="lv:clear-flash" phx-value-key="info"
     = live_flash(@flash, :info)
 

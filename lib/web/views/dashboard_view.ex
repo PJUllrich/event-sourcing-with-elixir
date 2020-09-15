@@ -30,6 +30,6 @@ defmodule Web.DashboardView do
   end
 
   def status(_shipment) do
-    render(Web.IconView, "badge.html", color: "gray", label: "Registered", icon: "fa-check")
+    render(Web.IconView, "badge.html", color: "gray", label: "Registered", icon: "fa-plus")
   end
 end
