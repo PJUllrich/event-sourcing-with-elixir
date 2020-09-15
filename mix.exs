@@ -41,6 +41,7 @@ defmodule Demo.MixProject do
       {:phoenix_ecto, "~> 4.1"},
       {:ecto_sql, "~> 3.4"},
       {:postgrex, ">= 0.0.0"},
+      {:tzdata, "~> 1.0.1"},
       {:phoenix_live_view, "~> 0.14.4"},
       {:floki, ">= 0.0.0", only: :test},
       {:phoenix_html, "~> 2.11"},

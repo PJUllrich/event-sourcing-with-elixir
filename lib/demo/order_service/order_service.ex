@@ -9,9 +9,18 @@ defmodule Demo.OrderService do
   def start_link(opts \\ []) do
     shipment_creation_interval = opts[:shipment_creation_interval] || 10_000
 
+    last_shipment_id =
+      Shared.EventStore.stream_all_forward()
+      |> Stream.filter(&(&1.event_type == "#{ShipmentRegistered}"))
+      |> Enum.to_list()
+      |> length()
+
     opts =
       opts
-      |> Keyword.merge(shipment_creation_interval: shipment_creation_interval, running_id: 0)
+      |> Keyword.merge(
+        shipment_creation_interval: shipment_creation_interval,
+        running_id: last_shipment_id
+      )
       |> Map.new()
 
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)

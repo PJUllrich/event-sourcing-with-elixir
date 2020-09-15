@@ -32,8 +32,7 @@ defmodule FulfillmentService do
   def handle_info({:schedule_shipment, shipment_id}, opts) do
     event = %ShipmentScheduled{
       shipment_id: shipment_id,
-      scheduled_for:
-        NaiveDateTime.local_now() |> NaiveDateTime.to_time() |> Time.add(opts[:fulfillment_delay])
+      scheduled_for: gen_scheduled_time(opts)
     }
 
     :ok = Shared.EventPublisher.publish(shipment_id, event, %{enacted_by: __MODULE__})
@@ -68,5 +67,11 @@ defmodule FulfillmentService do
     Broadcaster.broadcast("FulfillmentService", event)
 
     {:noreply, opts}
+  end
+
+  defp gen_scheduled_time(%{fulfillment_delay: fulfillment_delay}) do
+    DateTime.now!("Europe/Berlin")
+    |> DateTime.to_time()
+    |> Time.add(fulfillment_delay, :millisecond)
   end
 end
