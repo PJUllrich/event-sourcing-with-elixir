@@ -19,7 +19,8 @@ defmodule Demo.Application do
           {Demo.OrderService, []},
           {FulfillmentService.Supervisor, []},
           {TrackAndTraceService.Supervisor, []},
-          {AnalyticsService.Supervisor, []}
+          {AnalyticsService.Supervisor, []},
+          {FleetService.Supervisor, []}
         ]
 
     Faker.start()

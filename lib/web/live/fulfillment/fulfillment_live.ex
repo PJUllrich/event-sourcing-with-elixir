@@ -68,4 +68,6 @@ defmodule Web.FulfillmentLive do
 
     socket
   end
+
+  defp update_shipment(_event_data, socket), do: socket
 end

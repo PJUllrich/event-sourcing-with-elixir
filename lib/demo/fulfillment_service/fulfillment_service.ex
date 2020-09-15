@@ -69,6 +69,9 @@ defmodule FulfillmentService do
     {:noreply, opts}
   end
 
+  ###############################################################################################
+  # Private functions
+
   defp gen_scheduled_time(%{fulfillment_delay: fulfillment_delay}) do
     DateTime.now!("Europe/Berlin")
     |> DateTime.to_time()
