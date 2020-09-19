@@ -23,41 +23,56 @@ defmodule Web.AnalyticsLive do
   end
 
   @impl true
-  def handle_info(event_data, socket) do
-    {:noreply, handle(event_data, socket)}
+  def handle_info(%ShipmentRegistered{} = _event, socket) do
+    {:noreply, update(socket, :shipment_count, &(&1 + 1))}
   end
 
-  defp handle(%ShipmentRegistered{} = _event, socket) do
-    update(socket, :shipment_count, &(&1 + 1))
+  @impl true
+  def handle_info(%ShipmentScheduled{} = _event, socket) do
+    {:noreply, update(socket, :scheduled, &(&1 + 1))}
   end
 
-  defp handle(%ShipmentScheduled{} = _event, socket) do
-    update(socket, :scheduled, &(&1 + 1))
+  @impl true
+  def handle_info(%ShipmentOutForDelivery{} = _event_data, socket) do
+    socket =
+      socket
+      |> update(:out_for_delivery, &(&1 + 1))
+      |> update(:scheduled, &(&1 - 1))
+
+    {:noreply, socket}
   end
 
-  defp handle(%ShipmentOutForDelivery{} = _event_data, socket) do
-    socket
-    |> update(:out_for_delivery, &(&1 + 1))
-    |> update(:scheduled, &(&1 - 1))
+  @impl true
+  def handle_info(%ShipmentDeliveredSuccessfully{} = _event, socket) do
+    socket =
+      socket
+      |> update(:successfull_deliveries, &(&1 + 1))
+      |> update(:out_for_delivery, &(&1 - 1))
+
+    {:noreply, socket}
   end
 
-  defp handle(%ShipmentDelivered{} = %{delivered_successfully: true}, socket) do
-    socket
-    |> update(:successfull_deliveries, &(&1 + 1))
-    |> update(:out_for_delivery, &(&1 - 1))
+  @impl true
+  def handle_info(%DeliveryFailed{} = _event, socket) do
+    socket =
+      socket
+      |> update(:failed_deliveries, &(&1 + 1))
+      |> update(:out_for_delivery, &(&1 - 1))
+
+    {:noreply, socket}
   end
 
-  defp handle(%ShipmentDelivered{} = %{delivered_successfully: false}, socket) do
-    socket
-    |> update(:failed_deliveries, &(&1 + 1))
-    |> update(:out_for_delivery, &(&1 - 1))
-  end
-
-  defp handle(_event, socket), do: socket
+  @impl true
+  def handle_info(_event, socket), do: {:noreply, socket}
 
   defp fetch_all_events(socket) do
-    Shared.EventStore.stream_all_forward()
-    |> Enum.map(& &1.data)
-    |> Enum.reduce(socket, &handle/2)
+    {:noreply, socket} =
+      Shared.EventStore.stream_all_forward()
+      |> Enum.map(& &1.data)
+      |> Enum.reduce({:noreply, socket}, fn event_data, {:noreply, socket} ->
+        handle_info(event_data, socket)
+      end)
+
+    socket
   end
 end

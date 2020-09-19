@@ -3,6 +3,8 @@ defmodule Web.FleetLive do
 
   require Logger
 
+  alias Web.FleetLive.VehicleComponent
+
   @impl true
   def render(assigns), do: Web.DashboardView.render("fleet/index.html", assigns)
 
@@ -19,36 +21,40 @@ defmodule Web.FleetLive do
   end
 
   @impl true
-  def handle_info(event_data, socket) do
-    {:noreply, handle(event_data, socket)}
+  def handle_info(%ShipmentDelegatedToVehicle{} = %{vehicle_id: vehicle_id}, socket) do
+    send_update(VehicleComponent, id: vehicle_id, planned_shipment_count_inc: 1)
+    {:noreply, socket}
   end
 
-  defp handle(%ShipmentDelegatedToVehicle{} = %{vehicle_id: vehicle_id}, socket) do
-    send_update(Web.FleetLive.VehicleComponent, id: vehicle_id, planned_shipment_count_inc: 1)
-    socket
+  @impl true
+  def handle_info(%VehicleOutForDelivery{} = %{vehicle_id: vehicle_id}, socket) do
+    send_update(VehicleComponent, id: vehicle_id, out_for_delivery: true)
+    {:noreply, socket}
   end
 
-  defp handle(%VehicleOutForDelivery{} = %{vehicle_id: vehicle_id}, socket) do
-    send_update(Web.FleetLive.VehicleComponent, id: vehicle_id, out_for_delivery: true)
-    socket
-  end
-
-  defp handle(%VehicleReturned{} = %{vehicle_id: vehicle_id}, socket) do
-    send_update(Web.FleetLive.VehicleComponent,
+  @impl true
+  def handle_info(%VehicleReturned{} = %{vehicle_id: vehicle_id}, socket) do
+    send_update(VehicleComponent,
       id: vehicle_id,
       planned_shipment_count: 0,
       out_for_delivery: false
     )
 
-    socket
+    {:noreply, socket}
   end
 
-  defp handle(_event, socket), do: socket
+  @impl true
+  def handle_info(_event, socket), do: {:noreply, socket}
 
   defp fetch_all_events(socket) do
-    Shared.EventStore.stream_all_forward()
-    |> Enum.sort_by(& &1.created_at)
-    |> Enum.map(& &1.data)
-    |> Enum.reduce(socket, &handle/2)
+    {:noreply, socket} =
+      Shared.EventStore.stream_all_forward()
+      |> Enum.sort_by(& &1.created_at)
+      |> Enum.map(& &1.data)
+      |> Enum.reduce({:noreply, socket}, fn event_data, {:noreply, socket} ->
+        handle_info(event_data, socket)
+      end)
+
+    socket
   end
 end

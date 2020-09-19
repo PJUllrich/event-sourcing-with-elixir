@@ -1,3 +1,3 @@
-defmodule ShipmentDelivered do
-  defstruct [:shipment_id, :delivered_successfully]
+defmodule ShipmentDeliveredSuccessfully do
+  defstruct [:shipment_id]
 end

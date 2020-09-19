@@ -96,10 +96,12 @@ defmodule FulfillmentService do
   end
 
   def handle_info({:shipment_delivered, shipment_id}, opts) do
-    event = %ShipmentDelivered{
-      shipment_id: shipment_id,
-      delivered_successfully: Enum.random([true, true, true, false])
-    }
+    event =
+      if Enum.random([true, true, true, false]) do
+        %ShipmentDeliveredSuccessfully{shipment_id: shipment_id}
+      else
+        %DeliveryFailed{shipment_id: shipment_id}
+      end
 
     :ok = Shared.EventPublisher.publish(shipment_id, event, %{enacted_by: __MODULE__})
     Broadcaster.broadcast("FulfillmentService", event)
