@@ -7,7 +7,7 @@ defmodule FleetService.Supervisor do
 
   def init([_args]) do
     children = [
-      FleetService.ShipmentScheduledConsumer,
+      FleetService.ShipmentScheduledForDeliveryConsumer,
       FleetService
     ]
 

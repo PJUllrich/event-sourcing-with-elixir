@@ -28,7 +28,7 @@ defmodule Web.AnalyticsLive do
   end
 
   @impl true
-  def handle_info(%ShipmentScheduled{} = _event, socket) do
+  def handle_info(%ShipmentScheduledForDelivery{} = _event, socket) do
     {:noreply, update(socket, :scheduled, &(&1 + 1))}
   end
 

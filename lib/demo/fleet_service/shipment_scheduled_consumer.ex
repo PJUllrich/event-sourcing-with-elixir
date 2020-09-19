@@ -1,7 +1,7 @@
-defmodule FleetService.ShipmentScheduledConsumer do
+defmodule FleetService.ShipmentScheduledForDeliveryConsumer do
   use Shared.EventConsumer
 
-  def handle(%ShipmentScheduled{} = %{shipment_id: shipment_id}, state) do
+  def handle(%ShipmentScheduledForDelivery{} = %{shipment_id: shipment_id}, state) do
     FleetService.delegate_shipment_to_vehicle(shipment_id)
     {:ok, state}
   end

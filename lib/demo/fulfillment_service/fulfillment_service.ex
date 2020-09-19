@@ -84,7 +84,7 @@ defmodule FulfillmentService do
   end
 
   def handle_info({:schedule_shipment, shipment_id}, opts) do
-    event = %ShipmentScheduled{
+    event = %ShipmentScheduledForDelivery{
       shipment_id: shipment_id,
       scheduled_for: gen_scheduled_time(opts)
     }
