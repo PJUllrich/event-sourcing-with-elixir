@@ -3,8 +3,10 @@ defmodule Demo.EventConsumer do
 
   alias Demo.Events.ShipmentRegistered
 
-  def handle(%ShipmentRegistered{} = event_data, state) do
+  def handle(%ShipmentRegistered{} = event_data, %{metadata: metadata}) do
     IO.inspect(event_data, label: "Demo.EventConsumer received Event")
-    {:ok, state}
+    IO.inspect(metadata, label: "Demo.EventConsumer received Metadata")
+
+    :ok
   end
 end

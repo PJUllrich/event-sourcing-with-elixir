@@ -10,21 +10,12 @@ defmodule Shared.EventConsumer do
       # Adds default handle method
       @before_compile unquote(__MODULE__)
 
-      def start_link(opts) do
-        handler_module = opts[:handler_module] || __MODULE__
-        initial_state = opts[:initial_state] || %{}
-        event_store = opts[:event_store] || Demo.EventStore
+      def start_link(_opts) do
+        handler_module = __MODULE__
 
-        opts =
-          opts
-          |> Keyword.merge(
-            handler_module: handler_module,
-            state: initial_state,
-            event_store: event_store
-          )
-          |> Map.new()
+        state = %{handler_module: handler_module}
 
-        GenServer.start_link(handler_module, opts, name: handler_module)
+        GenServer.start_link(handler_module, state, name: handler_module)
       end
 
       def init(opts), do: {:ok, subscribe(opts)}
@@ -36,64 +27,52 @@ defmodule Shared.EventConsumer do
 
       # Event notification
       def handle_info({:events, events}, opts) do
-        opts = Enum.reduce(events, opts, &handle_event/2)
-
+        Enum.each(events, &handle_event(&1, opts))
         {:noreply, opts}
       end
 
       ###############################################################################################
       # Private functions
 
-      defp subscribe(%{handler_module: handler_module, event_store: event_store} = opts) do
+      defp subscribe(%{handler_module: handler_module} = opts) do
         {:ok, subscription} =
-          event_store.subscribe_to_all_streams(
-            subscription_name(opts),
-            self()
-          )
+          Demo.EventStore.subscribe_to_all_streams("#{handler_module}", self())
 
         Map.merge(opts, %{subscription: subscription})
       end
 
-      defp subscription_name(%{handler_module: handler_module} = _opts) do
-        "#{handler_module}"
-      end
-
       defp handle_event(
              %{data: event_data} = event,
-             %{handler_module: handler_module, state: old_state} = opts
+             %{handler_module: handler_module} = opts
            ) do
-        new_state =
-          event_data
-          |> handler_module.handle(old_state, event)
-          |> case do
-            {:ok, new_state} ->
-              # Only acknowledge the event
-              ack_event(opts, event)
-              new_state
+        event_data
+        |> handler_module.handle(event)
+        |> case do
+          :ok ->
+            ack_event(opts, event)
 
-            error ->
-              Logger.error(inspect(error))
-              old_state
-          end
+          error ->
+            Logger.error(inspect(error))
+        end
 
-        %{opts | state: new_state}
+        opts
       end
 
-      defp ack_event(%{event_store: event_store, subscription: subscription} = opts, event) do
-        :ok = event_store.ack(subscription, event)
+      defp ack_event(%{subscription: subscription} = opts, event) do
+        :ok = Demo.EventStore.ack(subscription, event)
       end
     end
   end
 
   defmacro __before_compile__(_env) do
     quote generated: true do
-      def handle(_event_data, state), do: {:ok, state}
+      def handle(_event_data), do: :ok
+
+      defoverridable handle: 1
+
+      def handle(event_data, _event), do: handle(event_data)
 
       defoverridable handle: 2
-
-      def handle(event_data, state, _event), do: handle(event_data, state)
-
-      defoverridable handle: 3
     end
   end
 end

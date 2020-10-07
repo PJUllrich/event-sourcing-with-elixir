@@ -11,3 +11,5 @@ config :event_store_example, Demo.EventStore,
   password: "postgres",
   database: "eventstore_example",
   hostname: "localhost"
+
+config :logger, :console, level: :info
